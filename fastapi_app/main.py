@@ -3,6 +3,7 @@
 # TODO: add rate limiting
 import os, time
 from fastapi import FastAPI, Header, HTTPException, Request
+from fastapi.responses import StreamingResponse
 from .retriever import retrieve
 from .llm_loader import stream
 from clickhouse_connect import get_client
@@ -25,12 +26,13 @@ async def ask(req: Request, x_api_key: str = Header(None)):
     q = (await req.json())["query"]
     docs = retrieve(q)
     prompt = q + "\n" + "\n".join(t for t, _ in docs)
-    if req.headers.get("accept") == "text/event-stream":
+    if "text/event-stream" in req.headers.get("accept", ""):
         async def gen():
             ans = ""
             for t in stream(prompt):
                 ans += t
                 yield f"data: {t}\n\n"
+            yield "data: [DONE]\n\n"
             ck.insert("logs", [{"q": q, "a": ans, "ts": time.time()}])
         return StreamingResponse(gen(), media_type="text/event-stream")
     ans = "".join(stream(prompt))
