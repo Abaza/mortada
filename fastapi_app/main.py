@@ -2,17 +2,35 @@
 # TODO: rotate API keys
 # TODO: add rate limiting
 import os, time
+from pathlib import Path
 from fastapi import FastAPI, Header, HTTPException, Request
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, HTMLResponse
 from .retriever import retrieve
 from .llm_loader import stream
-from clickhouse_connect import get_client
+try:
+    from clickhouse_connect import get_client
+    ck = get_client(url=os.getenv("CLICKHOUSE_URL", "http://localhost:8123"))
+    ck.command(
+        "CREATE TABLE IF NOT EXISTS logs (q String, a String, ts DateTime) ENGINE=MergeTree ORDER BY ts"
+    )
+except Exception:  # pragma: no cover - optional DB
+    class _Dummy:
+        def insert(self, *a, **kw):
+            pass
+
+        def command(self, *a, **kw):
+            pass
+
+    ck = _Dummy()
 
 API_KEY = os.getenv("API_KEY", "dev")
-ck = get_client(url=os.getenv("CLICKHOUSE_URL", "http://localhost:8123"))
-ck.command("CREATE TABLE IF NOT EXISTS logs (q String, a String, ts DateTime) ENGINE=MergeTree ORDER BY ts")
 
 app = FastAPI()
+
+
+@app.get("/", response_class=HTMLResponse)
+async def index():
+    return Path("fastapi_app/templates/index.html").read_text()
 
 
 def auth(key: str | None):

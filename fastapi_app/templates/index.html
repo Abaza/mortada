@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Mortada</title>
+</head>
+<body>
+    <h1>Mortada Q&A</h1>
+    <textarea id="question" rows="4" cols="50"></textarea><br>
+    <button onclick="ask()">Ask</button>
+    <pre id="answer"></pre>
+    <script>
+        async function ask() {
+            const answerEl = document.getElementById('answer');
+            answerEl.textContent = '';
+            const query = document.getElementById('question').value;
+            const res = await fetch('/ask', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-API-Key': 'dev',
+                    'Accept': 'text/event-stream'
+                },
+                body: JSON.stringify({query})
+            });
+            const reader = res.body.getReader();
+            const decoder = new TextDecoder('utf-8');
+            let buffer = '';
+            while (true) {
+                const {value, done} = await reader.read();
+                if (done) break;
+                buffer += decoder.decode(value, {stream: true});
+                let lines = buffer.split('\n\n');
+                buffer = lines.pop();
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        const content = line.slice(6);
+                        if (content === '[DONE]') return;
+                        answerEl.textContent += content;
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>
