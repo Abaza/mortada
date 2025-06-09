@@ -3,6 +3,7 @@
 # TODO: add rate limiting
 import os, time
 from fastapi import FastAPI, Header, HTTPException, Request
+from fastapi.responses import StreamingResponse
 from .retriever import retrieve
 from .llm_loader import stream
 from clickhouse_connect import get_client
