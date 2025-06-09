@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "mortada"
+version = "0.1.0"
+description = "Arabic legal RAG MVP"
+authors = ["AI"]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.104"
+uvicorn = {extras = ["standard"], version = "^0.23"}
+llama-index = "^0.9"
+sentence-transformers = "^2.2"
+faiss-cpu = "^1.7"
+transformers = "^4.33"
+bitsandbytes = "^0.41"
+clickhouse-connect = "^0.6"
+pydantic = "^2.4"
+pdfminer.six = "^20221105"
+python-docx = "^0.8"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

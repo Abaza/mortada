@@ -1,0 +1,17 @@
+version: '3'
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/app
+      - /hf_cache:/root/.cache/huggingface
+    environment:
+      - API_KEY=${API_KEY}
+      - LLM_MODEL_ID=${LLM_MODEL_ID}
+      - CLICKHOUSE_URL=${CLICKHOUSE_URL}
+  clickhouse:
+    image: clickhouse/clickhouse-server
+    ports:
+      - "8123:8123"
