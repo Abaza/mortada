@@ -15,7 +15,7 @@ transformers = "^4.33"
 bitsandbytes = "^0.41"
 clickhouse-connect = "^0.6"
 pydantic = "^2.4"
-pdfminer.six = "^20221105"
+"pdfminer.six" = "^20221105"
 python-docx = "^0.8"
 
 [tool.poetry.group.dev.dependencies]
